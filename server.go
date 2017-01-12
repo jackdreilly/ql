@@ -33,9 +33,11 @@ func SuggestServer(w http.ResponseWriter, r *http.Request) {
 func SearchServer(w http.ResponseWriter, r *http.Request) {
 	UpdateFetcher(r)
 	query := r.URL.Query().Get("lyrics")
+	Client.StoreSearch(query)
 	lyrics, e := GetLyricsForQuery(query)
 	if e != nil {
-		panic(e)
+		http.Error(w, e.Error(), http.StatusNotFound)
+		return
 	}
 	b, e := json.Marshal(SearchResponse{lyrics})
 	if e != nil {

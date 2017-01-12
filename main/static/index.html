@@ -1,127 +1,23 @@
 <html>
   <head>
-    <link href="css/style.css" rel="stylesheet" type="text/css" media="screen"/>
     <title>QuikLyrics | Predictive, No Ads Lyrics Search</title>
-    <script src="https://www.google.com/jsapi?key=ABQIAAAAPOyrVA2opyXZg4YIh4nQnRRjAeP1u_FeFjMiwqDnr0MoUgOKkxR2Rr18yBNY5mApPBTjan-YQjvfSA" type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.js"></script>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/themes/base/jquery-ui.css" type="text/css" media="all" />
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="bower_components/paper-autocomplete/paper-autocomplete.html">
+    <link rel="import" href="bower_components/paper-toast/paper-toast.html">
+    <link rel="import" href="bower_components/paper-styles/paper-styles.html" />
+    <link rel="import" href="css/style.html">
   </head>
   <body>
-    <center>
-      <div id="container"  align=center>
-	<table>
-	  <tr>
-	    <td>
-	      <h1>Quik Lyrics</h1>
-	      <table class="mainbar">
-		<tr>
-		  <td class="mainbar" >
-		    <div id="mobileclick" ></div>
-		  </td>
-		  <td class="mainbar" >
-		    <a name="searchBarLinker">
-		      <input type="text" id="lyricsSearch" placeholder="song or lyrics sample" />
-		    </a>
-		  </td>
-		</tr>
-	      </table>
-	      <hr />
-	      <div id="results" ></div>
-      </div>
-    </center>
-    <img src="images/ql2small.png" ></img>    
+  <h1>Quik Lyrics</h1>
+  <paper-autocomplete autofocus="autofocus" label="Lyrics or song sample" id="input-remote" remote-source="true" min-length="2"></paper-autocomplete>
+  <section id="lyrics" class="shadow">
+  <h2 id="lyrics-title">
+  </h2>
+  <div id="lyrics-lyrics">
+  </div>
+  </section>
+  <img src="images/ql2small.png" ></img>
+  <paper-toast></paper-toast>
   </body>
-    <script>
-      var webSearch;
-      var runningRequest = false;
-      var request;
-      webResults = new Array();
-      function keyPressed() {
-      if (event.charCode == 13) {
-      var txt = $("#lyricsSearch")[0].value
-      if (txt == "") {
-      return;
-      }
-      getLyricsFromSite(txt);
-      } else {
-      var e = jQuery.Event("keypress");
-      e.keyCode = $.ui.keyCode.DOWN;
-      $("lyricsSearch").trigger(e);
-      }
-      }
-      //Identify the typing action
-      function didChangeSB(e, ui) {
-      $.get('suggest', {
-      'lyrics': this.value,
-      }, gSearchComplete, 'json');
-      }
-      $("#lyricsSearch").focus().autocomplete({
-      source: webResults,
-      search: didChangeSB,
-      select: selectedOption,
-      delay: 100
-      });
-      $("#lyricsSearch")[0].onkeypress = keyPressed;
-      $("#lyricsSearch")[0].onkeyup = keyDownCheck;
-
-
-
-      function keyDownCheck() {
-      if ($("#lyricsSearch")[0].value == "") {
-      $('div#results').html("");
-      }
-
-      }
-
-      function selectedOption(event, ui) {
-      txt = $("#lyricsSearch")[0].value;
-      if (txt == "") {
-      return;
-      }
-      getLyricsFromSite(txt);
-      }
-
-      function getLyricsFromSite(songTitle) {
-      $('div#results').html("Looking up lyrics...<br />Tip: Try adding or removing the artist name");
-      request = $.getJSON('lyrics', {
-      lyrics: songTitle,
-      }, function(data) {
-      showResults(data, songTitle);
-      runningRequest = false;
-      });
-      }
-
-      function showResults(item, highlight) {
-      var resultHtml = '';
-      resultHtml += '<div class="result">';
-	resultHtml += '<h2>' + item.lyrics.Title + '</h2>';
-	resultHtml += '<p>' + item.lyrics.Lyrics.replace(highlight, '<span class="highlight">' + highlight + '</span>').replace('CHORUS', '<span class="highlight">CHORUS</span>') + '</p>';
-	resultHtml += '</div>';
-      $('div#results').html(resultHtml);
-      }
-
-      function gSearchComplete(response) {
-      if (response.suggestions && response.suggestions.length > 0) {
-      var results = response.suggestions;
-      for (var i = 0; i < results.length; i++) {
-			  webResults[i] = results[i].replace(/lyrics/ig, '');
-			  }
-			  $("#lyricsSearch").autocomplete({
-			  source: webResults
-			  });
-			  var e = jQuery.Event("keypress");
-			  e.keyCode = $.ui.keyCode.DOWN;
-			  $("lyricsSearch").trigger(e);
-			  }
-			  }
-
-			  if (jQuery.browser.mobile) {
-
-			  $("#mobileclick").html('<button type="button" >Search</button>');
-			  $("#mobileclick")[0].onclick = selectedOption;
-
-			       }
-    </script>
-  
+  <script src="js/all.js"></script>
 </html>

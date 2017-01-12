@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/jackdreilly/quiklyrics"
 	"log"
 	"net/http"
 	"os"
+	"reillybrothers.net/jackdreilly/quiklyrics"
 )
 
 func main() {
