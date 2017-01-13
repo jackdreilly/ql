@@ -43,7 +43,7 @@ type Search struct {
 }
 
 type Website struct {
-	Url String
+	Url string
 }
 
 func (d *DbClient) StoreSearch(s string) {
