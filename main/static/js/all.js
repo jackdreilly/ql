@@ -1,10 +1,16 @@
+function selectAlternative(e) {
+  console.log(e);
+}
 (function() {
-  var inputRemote, paperToast, lyricsElement;
+  var inputRemote, paperToast, spinner, lyricsCard, additionalResults;
 
   HTMLImports.whenReady(function() {
     inputRemote = document.querySelector('#input-remote');
     paperToast = document.querySelector('paper-toast');
-    lyricsElement = document.querySelector('#lyrics');
+    spinner = document.querySelector('paper-spinner');
+    lyricsCard = document.querySelector('#lyrics');
+    lyricsItem = lyricsCard.querySelector('#lyrics');
+    additionalResults = document.querySelector('iron-list');
     document.addEventListener('autocomplete-selected', onSelect);
     document.addEventListener('autocomplete-change', onChange)
     inputRemote.querySelector("input").addEventListener('change', function(e) {
@@ -21,7 +27,6 @@
       }
     });
     inputRemote.$.autocompleteInput.focus();
-    lyrics.style.setProperty('display', 'none');
   });
 
   function onSelect(event) {
@@ -35,13 +40,15 @@
     var url = '/lyrics?lyrics=' + lyrics;
     var req = new XMLHttpRequest();
     req.open('GET', encodeURI(url));
+    spinner.active = true;
     req.onload = function() {
       paperToast.hide();
+      spinner.active = false;
       if (req.status === 200) {
         var data = JSON.parse(req.response);
-        lyricsElement.style.removeProperty('display');
-        lyricsElement.querySelector("#lyrics-title").innerHTML = data.lyrics.Title;
-        lyricsElement.querySelector("#lyrics-lyrics").innerHTML = data.lyrics.Lyrics;
+        lyricsCard.heading = data.Lyrics.Title;
+        lyricsItem.querySelector('.card-content').innerHTML = data.Lyrics.Lyrics;
+        additionalResults.items = data.Alternatives;
       }
     };
     req.send();

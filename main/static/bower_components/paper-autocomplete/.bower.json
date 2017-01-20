@@ -1,6 +1,6 @@
 {
   "name": "paper-autocomplete",
-  "version": "2.1.5",
+  "version": "2.2.0",
   "authors": [
     "S. Francis",
     "Rodolfo Oviedo <rodo1111@gmail.com>",
@@ -48,16 +48,18 @@
     "paper-toast": "^1.3.0",
     "elliptical-sass": "^1.2.29",
     "css-docs": "^1.0.3",
-    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.3.0"
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.3.0",
+    "iron-form": "^1.1.4",
+    "paper-button": "^1.0.14"
   },
-  "_release": "2.1.5",
+  "_release": "2.2.0",
   "_resolution": {
     "type": "version",
-    "tag": "v2.1.5",
-    "commit": "b1befcff643e50c1c86738d4ca56ca5c1f131b7d"
+    "tag": "v2.2.0",
+    "commit": "45305d780d19bbb174cadcd8a6a99ac3306fb0de"
   },
   "_source": "https://github.com/ellipticaljs/paper-autocomplete.git",
-  "_target": "^2.1.5",
+  "_target": "^2.2.0",
   "_originalSource": "paper-autocomplete",
   "_direct": true
 }

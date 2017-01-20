@@ -1,22 +1,28 @@
-<style is="custom-style">
+<style>
 body {
     font-family: 'Roboto', 'Noto', sans-serif;
     -webkit-font-smoothing: antialiased;
-    padding: 16px;
 }
-:host {
-display: block;
-background: var(--paper-blue-500);
-padding: 20px;
-}
+
 .title { @apply(--paper-font-title); }
-.shadow {
-  @apply(--shadow-elevation-16dp);
-  margin: 10px;
-  padding: 8px;
+
+.quiklyrics.content {
+    margin: 15px;
 }
-#lyrics-lyrics {
-  white-space: pre-wrap;
+
+#actual-lyrics {
+  white-space: pre-line;
+  color: black;
+}
+paper-card {
+  width: 100%;
+}
+
+paper-progress.green {
+    --paper-progress-active-color: var(--paper-light-green-500);
+    --paper-progress-secondary-color: var(--paper-light-green-100);
+    width:100%;
+    display: block;
 }
 
 </style>

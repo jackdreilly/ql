@@ -131,34 +131,45 @@ func MetroLyrics(link string) (Lyrics, error) {
 	return Lyrics{buffer.String(), title}, nil
 }
 
-func GetLyrics(searchResults []Result) (Lyrics, error) {
+func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
+	alts := []Alternative{}
+	found := false
+	sln := Lyrics{}
 	for _, result := range searchResults {
 		log.Println(result)
+		var err error
+		lyrics := Lyrics{}
 		if strings.Contains(result.URL(), "lyricsfreak.com") {
-			lyrics, err := LyricsFreak(result.URL())
-			if err == nil {
-				return lyrics, nil
-			}
+			lyrics, err = LyricsFreak(result.URL())
 		} else if strings.Contains(result.URL(), "metrolyrics.com") {
-			lyrics, err := MetroLyrics(result.URL())
-			if err == nil {
-				return lyrics, nil
-			}
+			lyrics, err = MetroLyrics(result.URL())
 		} else if strings.Contains(result.URL(), "directlyrics.com") {
-			lyrics, err := DirectLyrics(result.URL())
-			if err == nil {
-				return lyrics, nil
-			}
+			lyrics, err = DirectLyrics(result.URL())
 		} else if strings.Contains(result.URL(), "azlyrics.com") {
-			lyrics, err := AzLyrics(result.URL())
-			if err == nil {
-				return lyrics, nil
+			lyrics, err = AzLyrics(result.URL())
+		} else {
+			continue
+		}
+		if err == nil {
+			if !found {
+				found = true
+				sln = lyrics
+				continue
 			}
+			alts = append(alts, Alternative{
+				Title: strings.TrimSpace(lyrics.Title),
+				Url:   result.URL(),
+			})
 		}
 	}
-	return Lyrics{}, errors.New("No matches")
+	if !found {
+		return Lyrics{}, alts, errors.New("No matches")
+	}
+	sln.Lyrics = strings.TrimSpace(sln.Lyrics)
+	return sln, alts, nil
+
 }
 
-func GetLyricsForQuery(query string) (Lyrics, error) {
+func GetLyricsForQuery(query string) (Lyrics, []Alternative, error) {
 	return GetLyrics(GoogleSearch(query))
 }
