@@ -1,6 +1,7 @@
 package quiklyrics
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -12,14 +13,14 @@ const (
 )
 
 // url gives suggest url for query string
-func suggestUrl(query string) string {
-	lyricsQuery := "lyrics " + query
+func suggestUrl(query string, lyricsOrChords string) string {
+	lyricsQuery := fmt.Sprintf("%v %v", lyricsOrChords, query)
 	return baseURL + url.QueryEscape(lyricsQuery)
 }
 
 // Suggest uses google suggest to return suggestions for current query
-func Suggest(query string) []string {
-	doc, err := CurrentFetcher.Fetch(suggestUrl(query))
+func Suggest(query string, lyricsOrChords string) []string {
+	doc, err := CurrentFetcher.Fetch(suggestUrl(query, lyricsOrChords))
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +28,7 @@ func Suggest(query string) []string {
 	doc.Find("suggestion").Each(func(i int, s *goquery.Selection) {
 		data := s.AttrOr("data", "")
 		if len(data) > 0 {
-			results = append(results, strings.Replace(data, "lyrics ", "", 1))
+			results = append(results, strings.Replace(data, lyricsOrChords+" ", "", 1))
 		}
 	})
 	return results

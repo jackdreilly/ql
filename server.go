@@ -37,7 +37,7 @@ func searchFake(query string) (Lyrics, []Alternative) {
 }
 
 func SuggestServer(w http.ResponseWriter, r *http.Request) {
-	response := Suggest(r.URL.Query().Get("lyrics"))
+	response := Suggest(r.URL.Query().Get("lyrics"), r.URL.Query().Get("lyricsOrChords"))
 	// response := suggestFake(r.URL.Query().Get("lyrics"))
 	b, e := json.Marshal(SuggestResponse{response})
 	if e != nil {
@@ -65,6 +65,21 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-var (
-	ChordsServer = SearchServer
-)
+func ChordsServer(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("lyrics")
+	Client.StoreSearch(query)
+	lyrics, alts, e := GetChordsForQuery(query)
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusNotFound)
+		return
+	}
+	// lyrics, alts := searchFake(query)
+	b, e := json.Marshal(SearchResponse{
+		Lyrics:       lyrics,
+		Alternatives: alts,
+	})
+	if e != nil {
+		panic(e)
+	}
+	w.Write(b)
+}

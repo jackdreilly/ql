@@ -11,7 +11,10 @@ import (
 
 const (
 	key           = "AIzaSyDTtyBAmPzhyB2vuHfUTP7k5Wbvv24PGsg"
-	searchBaseURL = "https://www.googleapis.com/customsearch/v1?cx=001283733761018543620%3Aujg1bejtz_y&key=" + key + "&q="
+	lyricsEngine  = "001283733761018543620%3Aujg1bejtz_y"
+	chordsEngine  = "001283733761018543620:wwna3zpolnc"
+	lyricsBaseURL = "https://www.googleapis.com/customsearch/v1?cx=" + lyricsEngine + "&key=" + key + "&q="
+	chordsBaseURL = "https://www.googleapis.com/customsearch/v1?cx=" + chordsEngine + "&key=" + key + "&q="
 )
 
 type Result struct {
@@ -20,7 +23,35 @@ type Result struct {
 }
 
 func GoogleSearch(query string) []Result {
-	requestURL := searchBaseURL + url.QueryEscape("lyrics "+query)
+	requestURL := lyricsBaseURL + url.QueryEscape("lyrics "+query)
+	res, err := CurrentFetcher.Get(requestURL)
+	if err != nil {
+		log.Println(requestURL)
+		log.Println(query)
+		panic(err)
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	var data customsearch.Search
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		panic(err)
+	}
+	var results = make([]Result, 0)
+	for _, item := range data.Items {
+		results = append(results, Result{item.Link, item.Title})
+	}
+	return results
+}
+
+func GoogleSearchChords(query string) []Result {
+	requestURL := chordsBaseURL + url.QueryEscape("chords "+query)
+	log.Println("requestURL", requestURL)
 	res, err := CurrentFetcher.Get(requestURL)
 	if err != nil {
 		log.Println(requestURL)
