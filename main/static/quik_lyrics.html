@@ -102,10 +102,10 @@
     </paper-collapse-item>
     </template>
     <div id="actual-lyrics">
-    <template is="dom-if" if="[[!_isChords(routeData.lyricsOrChords)]]">
+    <template is="dom-if" if="[[_isLyrics(routeData.lyricsOrChords, loading)]]">
       [[lyrics.Lyrics.Lyrics]]
     </template>
-    <template is="dom-if" if="[[_isChords(routeData.lyricsOrChords)]]">
+    <template is="dom-if" if="[[_isChords(routeData.lyricsOrChords, loading)]]">
       <tt>
         <html-echo html="[[lyrics.Lyrics.Lyrics]]"></html-echo>
       </tt>
@@ -127,8 +127,11 @@
           this.set('route.path', '/lyrics/mattress that you stole');
         }
     },
-    _isChords: function(lyricsOrChords) {
-      return 'chords' == lyricsOrChords;
+    _isChords: function(lyricsOrChords, loading) {
+      return 'chords' == lyricsOrChords && !loading;
+    },
+    _isLyrics: function(lyricsOrChords, loading) {
+      return 'lyrics' == lyricsOrChords && !loading;
     },
     _updateParams: function(s) {
       return {lyrics: s, lyricsOrChords: this.routeData.lyricsOrChords};
