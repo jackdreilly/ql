@@ -26,6 +26,30 @@
     <link rel="import" href="/static/components/denim.html" />
     <link rel="import" href="/static/css/style.html" />
   </head>
+  <dom-module id="html-echo">
+  <style>
+    :host {
+      display: block;
+    }
+  </style>
+  <template>
+  </template>
+  <script>
+    Polymer({
+      is: 'html-echo',
+      properties: {
+        html: {
+          type: String,
+          observer: '_htmlChanged'
+        }
+      },
+      _htmlChanged: function (neo) {
+        // WARNING: potential XSS vulnerability if `html` comes from an untrusted source
+        this.innerHTML = neo;
+      }
+    });
+</script>
+</dom-module>
   <dom-module id="quik-lyrics">
   <template>
   <app-location route="{{route}}" use-hash-as-path></app-location>
@@ -63,7 +87,7 @@
     <paper-progress indeterminate class="green" disabled="[[!loading]]"></paper-progress>
     </template>
     <div class="quiklyrics content">
-    <paper-autocomplete required="true" auto-validate="false" autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
+    <paper-autocomplete autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
     <paper-card heading="[[lyrics.Lyrics.Title]]">
     <div class="card-content">
     <template is="dom-if" if="[[!loading]]">
@@ -78,7 +102,14 @@
     </paper-collapse-item>
     </template>
     <div id="actual-lyrics">
-      [[lyrics.Lyrics.Lyrics]]    
+    <template is="dom-if" if="[[!_isChords(routeData.lyricsOrChords)]]">
+      [[lyrics.Lyrics.Lyrics]]
+    </template>
+    <template is="dom-if" if="[[_isChords(routeData.lyricsOrChords)]]">
+      <tt>
+        <html-echo html="[[lyrics.Lyrics.Lyrics]]"></html-echo>
+      </tt>
+    </template>
     </div>
     </div>
     </paper-card>
@@ -96,8 +127,11 @@
           this.set('route.path', '/lyrics/mattress that you stole');
         }
     },
+    _isChords: function(lyricsOrChords) {
+      return 'chords' == lyricsOrChords;
+    },
     _updateParams: function(s) {
-      return {lyrics: s};
+      return {lyrics: s, lyricsOrChords: this.routeData.lyricsOrChords};
     },
     _processSuggestions: function(s) {
       return s.suggestions.map(function(ss){

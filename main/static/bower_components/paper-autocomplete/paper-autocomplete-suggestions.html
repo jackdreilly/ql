@@ -582,8 +582,9 @@
       _selection: function (index) {
         var selectedOption;
         if (index < 0) {
-          selectedOption = {value: this.text, text: this.text};
-          this.value = this.text;
+          var text = this._input.value;
+          selectedOption = {value: text, text: text};
+          this.value = text;
         } else {
           selectedOption = this._suggestions[index];
         }
@@ -870,7 +871,7 @@
             objValue = objText;
           }
 
-          if (objText.toLowerCase().indexOf(query) === 0) {
+          if (true || objText.toLowerCase().indexOf(query) === 0) {
             // NOTE: the structure of the result object matches with the current template. For custom templates, you
             // might need to return more data
             queryResult.push({
