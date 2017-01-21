@@ -580,7 +580,13 @@
       },
 
       _selection: function (index) {
-        var selectedOption = this._suggestions[index];
+        var selectedOption;
+        if (index < 0) {
+          selectedOption = {value: this.text, text: this.text};
+          this.value = this.text;
+        } else {
+          selectedOption = this._suggestions[index];
+        }
 
         this._input.value = selectedOption[this.textProperty];
         this.selectedOption = selectedOption;
@@ -658,10 +664,10 @@
        * Event handler for the key ENTER press event
        */
       _keyenter: function () {
-        if (this.$.suggestionsWrapper.style.display == 'block' && this._currentIndex > -1) {
-          var index = this._currentIndex;
-          this._selection(index);
-        }
+        // if (this.$.suggestionsWrapper.style.display == 'block' && this._currentIndex > -1) {
+        var index = this._currentIndex;
+        this._selection(index);
+        // } 
       },
 
       /**
