@@ -73,30 +73,38 @@
       url="/[[routeData.lyricsOrChords]]"
       params="[[_updateParams(routeData.lyrics)]]"
       handle-as="json"
-      last-response="{{lyrics}}">
-    ></iron-ajax>
+      last-response="{{lyrics}}"></iron-ajax>
+    <iron-ajax
+      id="alternatives-ajax"
+      auto
+      verbose="true"
+      loading="{{urlLoading}}"
+      url="/url"
+      params="[[_alternativeParams(selectedAlternative)]]"
+      last-response="{{lyrics.Lyrics}}"
+      handle-as="json"></iron-ajax>
     <paper-header-panel main>
     <paper-toolbar>
-      <h1>QuikLyrics</h1>
+      <a class="nostyle" href="/quik#/lyrics/you stick around and it may show"><h1>QuikLyrics</h1></a>
       <paper-radio-group selected="{{routeData.lyricsOrChords}}">
       <paper-radio-button name="lyrics">Lyrics</paper-radio-button>
       <paper-radio-button name="chords">Chords</paper-radio-button>
     </paper-radio-group>
     </paper-toolbar>
     <template is="dom-if" if="[[loading]]">
-    <paper-progress indeterminate class="green" disabled="[[!loading]]"></paper-progress>
+    <paper-progress indeterminate disabled="[[!loading && !urlLoading]]"></paper-progress>
     </template>
     <div class="quiklyrics content">
     <paper-autocomplete autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
     <paper-card heading="[[lyrics.Lyrics.Title]]">
     <div class="card-content">
     <template is="dom-if" if="[[!loading]]">
-    <paper-collapse-item header="Alternatives" icon="icons:list">
-    <iron-list items="[[lyrics.Alternatives]]">
+    <paper-collapse-item opened="{{openedCollapse}}" header="Alternatives" icon="icons:list">
+    <iron-list as="item" items="[[lyrics.Alternatives]]" selection-enabled selected-item="{{selectedAlternative}}">
       <template>
-      <paper-item>
-        <a href="[[item.Url]]">[[item.Title]]</a>
-      </paper-item>
+        <paper-item>
+        <div>[[item.Title]]</div>
+        </paper-item>
       </template>
     </iron-list>
     </paper-collapse-item>
@@ -145,6 +153,20 @@
       var lyricsSearch = event.detail.text;
       this.set('routeData.lyrics', lyricsSearch);
     },
+    _alternativeParams: function(item) {
+      this.openedCollapse = false;
+      if (item == null) {
+        var oldParams = this.$['alternatives-ajax'].params;
+        if (oldParams == undefined) {
+          return {};
+        }
+        return oldParams;
+      }
+      return {
+        url: item.Url,
+        lyricsOrChords: this.routeData.lyricsOrChords
+      };
+    }
   });
   </script>
   </dom-module>

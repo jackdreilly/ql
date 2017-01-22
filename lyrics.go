@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -131,43 +132,88 @@ func MetroLyrics(link string) (Lyrics, error) {
 	return Lyrics{buffer.String(), title}, nil
 }
 
-func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
-	alts := []Alternative{}
-	found := false
-	sln := Lyrics{}
-	for _, result := range searchResults {
-		log.Println(result)
-		var err error
-		lyrics := Lyrics{}
-		if strings.Contains(result.URL(), "lyricsfreak.com") {
-			lyrics, err = LyricsFreak(result.URL())
-		} else if strings.Contains(result.URL(), "metrolyrics.com") {
-			lyrics, err = MetroLyrics(result.URL())
-		} else if strings.Contains(result.URL(), "directlyrics.com") {
-			lyrics, err = DirectLyrics(result.URL())
-		} else if strings.Contains(result.URL(), "azlyrics.com") {
-			lyrics, err = AzLyrics(result.URL())
-		} else {
+func GetLyricsUrl(url string) (lyrics Lyrics, err error) {
+	if strings.Contains(url, "lyricsfreak.com") {
+		lyrics, err = LyricsFreak(url)
+	} else if strings.Contains(url, "metrolyrics.com") {
+		lyrics, err = MetroLyrics(url)
+	} else if strings.Contains(url, "directlyrics.com") {
+		lyrics, err = DirectLyrics(url)
+	} else if strings.Contains(url, "azlyrics.com") {
+		lyrics, err = AzLyrics(url)
+	} else {
+		err = errors.New("No lyrics site match")
+	}
+	return
+}
+
+func helperLyrics(result Result, c chan lyricsError, i int, done chan struct{}) {
+	log.Println("started lyrics", i)
+	lyrics, err := GetLyricsUrl(result.URL())
+	select {
+	case c <- lyricsError{&lyrics, result.URL(), err, i}:
+	case <-done:
+		log.Println("We got told to leave early:", i)
+		return
+	}
+	log.Println("finished lyrics", i)
+}
+
+func pullResultsFromChannel(results chan lyricsError, done chan struct{}, numRequests int) (Lyrics, []Alternative, error) {
+	resultsSlice := make([]lyricsError, numRequests)
+	for i := 0; i < numRequests; i++ {
+		resultsSlice[i].er = errors.New("Never populated")
+	}
+	now := time.Now()
+	found0 := false
+	successes := 0
+	for i := 0; i < numRequests; i++ {
+		x := <-results
+		if x.er != nil {
+			resultsSlice[i].er = x.er
 			continue
 		}
-		if err == nil {
-			if !found {
-				found = true
-				sln = lyrics
-				continue
-			}
-			alts = append(alts, Alternative{
-				Title: strings.TrimSpace(lyrics.Title),
-				Url:   result.URL(),
-			})
+		successes += 1
+		resultsSlice[x.i] = x
+		if x.i == 0 {
+			found0 = true
+		}
+		elapsed := time.Now().Sub(now).Seconds()
+		log.Println("elapsed time:", elapsed, "seconds")
+		if successes >= 5 && elapsed >= 0.5 && found0 {
+			log.Println("leaving early.")
+			break
 		}
 	}
-	if !found {
+	sln := -1
+	alts := []Alternative{}
+	for i, le := range resultsSlice {
+		if le.er != nil {
+			continue
+		}
+		if sln < 0 {
+			sln = i
+		} else {
+			alts = append(alts, Alternative{Title: le.lyrics.Title, Url: le.url})
+		}
+	}
+	if sln < 0 {
 		return Lyrics{}, alts, errors.New("No matches")
 	}
-	sln.Lyrics = strings.TrimSpace(sln.Lyrics)
-	return sln, alts, nil
+	s := *resultsSlice[sln].lyrics
 
+	s.Lyrics = strings.TrimSpace(s.Lyrics)
+	return s, alts, nil
+}
+
+func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
+	results := make(chan lyricsError)
+	done := make(chan struct{})
+	defer close(done)
+	for i, r := range searchResults {
+		go helperLyrics(r, results, i, done)
+	}
+	return pullResultsFromChannel(results, done, len(searchResults))
 }
 
 func GetLyricsForQuery(query string) (Lyrics, []Alternative, error) {

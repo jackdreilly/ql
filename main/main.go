@@ -14,13 +14,9 @@ const (
 	mainPage       = "static/quik_lyrics.html"
 	notFoundPage   = "static/not_found.html"
 	redirectPrefix = "/quik"
-	port           = ":8083"
 	staticDir      = "static"
 	staticPrefix   = "/static/"
 )
-
-type Page struct {
-}
 
 func HandleMain(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, mainPage)
@@ -43,7 +39,8 @@ func main() {
 	r.HandleFunc("/suggest", quiklyrics.SuggestServer)
 	r.HandleFunc("/lyrics", quiklyrics.SearchServer)
 	r.HandleFunc("/chords", quiklyrics.ChordsServer)
+	r.HandleFunc("/url", quiklyrics.UrlServer)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/", r)
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }

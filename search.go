@@ -51,7 +51,6 @@ func GoogleSearch(query string) []Result {
 
 func GoogleSearchChords(query string) []Result {
 	requestURL := chordsBaseURL + url.QueryEscape("chords "+query)
-	log.Println("requestURL", requestURL)
 	res, err := CurrentFetcher.Get(requestURL)
 	if err != nil {
 		log.Println(requestURL)

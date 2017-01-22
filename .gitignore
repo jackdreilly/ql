@@ -27,3 +27,4 @@ _testmain.go
 *rdb
 *~
 main/static/bower_components/
+main/gin*

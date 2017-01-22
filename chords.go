@@ -31,40 +31,44 @@ func UltimateGuitar(link string) (Lyrics, error) {
 	return Lyrics{chords, title}, nil
 }
 
-func GetChords(searchResults []Result) (Lyrics, []Alternative, error) {
-	alts := []Alternative{}
-	found := false
-	sln := Lyrics{}
-	for _, result := range searchResults {
-		log.Println(result)
-		var err error
-		lyrics := Lyrics{}
-		if strings.Contains(result.URL(), "ultimate") {
-			lyrics, err = UltimateGuitar(result.URL())
-		} else {
-			continue
-		}
-		if err == nil {
-			if !found {
-				found = true
-				sln = lyrics
-				continue
-			}
-			alts = append(alts, Alternative{
-				Title: strings.TrimSpace(lyrics.Title),
-				Url:   result.URL(),
-			})
-		}
-	}
-	if !found {
-		return Lyrics{}, alts, errors.New("No matches")
-	}
-	sln.Lyrics = strings.TrimSpace(sln.Lyrics)
-	return sln, alts, nil
+type lyricsError struct {
+	lyrics *Lyrics
+	url    string
+	er     error
+	i      int
+}
 
+func GetChordsUrl(url string) (lyrics Lyrics, err error) {
+	if strings.Contains(url, "ultimate-guitar.com") {
+		lyrics, err = UltimateGuitar(url)
+	} else {
+		err = errors.New("No chords site match")
+	}
+	return
+}
+
+func helper(result Result, c chan lyricsError, i int, done chan struct{}) {
+	log.Println("started chords", i)
+	lyrics, err := GetChordsUrl(result.URL())
+	select {
+	case c <- lyricsError{&lyrics, result.URL(), err, i}:
+	case <-done:
+		log.Println("We got told to leave early:", i)
+		return
+	}
+	log.Println("finished lyrics", i)
+}
+
+func GetChords(searchResults []Result) (Lyrics, []Alternative, error) {
+	results := make(chan lyricsError, 10)
+	done := make(chan struct{})
+	defer close(done)
+	for i, r := range searchResults {
+		go helper(r, results, i, done)
+	}
+	return pullResultsFromChannel(results, done, len(searchResults))
 }
 
 func GetChordsForQuery(query string) (Lyrics, []Alternative, error) {
-	log.Println("Looking for chords", query)
 	return GetChords(GoogleSearchChords(query))
 }
