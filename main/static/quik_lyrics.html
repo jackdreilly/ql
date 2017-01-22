@@ -92,7 +92,7 @@
     </paper-radio-group>
     </paper-toolbar>
     <template is="dom-if" if="[[loading]]">
-    <paper-progress indeterminate disabled="[[!loading && !urlLoading]]"></paper-progress>
+    <paper-progress class="green" indeterminate disabled="[[_progressDisabled(loading, urlLoading)]]"></paper-progress>
     </template>
     <div class="quiklyrics content">
     <paper-autocomplete autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
@@ -166,6 +166,9 @@
         url: item.Url,
         lyricsOrChords: this.routeData.lyricsOrChords
       };
+    },
+    _progressDisabled: function(loading, urlLoading) {
+      return !this.loading && !this.urlLoading;
     }
   });
   </script>
