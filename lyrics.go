@@ -70,6 +70,12 @@ func LyricsFreak(link string) (Lyrics, error) {
 	for child != nil {
 		for child.Data == "br" {
 			child = child.NextSibling
+			if child == nil {
+				break
+			}
+		}
+		if child == nil {
+			break
 		}
 		buffer.WriteString(child.Data)
 		buffer.WriteString("\n")
