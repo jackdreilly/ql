@@ -27,38 +27,30 @@ func Genius(link string) (Lyrics, error) {
 		return Lyrics{}, errors.New("no match")
 	}
 	var buffer bytes.Buffer
-	var child = find.Get(0).FirstChild
-	for child != nil {
-		for child.Data == "br" {
-			child = child.NextSibling
-			if child == nil {
-				break
+	for _, node := range find.Nodes {
+		child := node.FirstChild
+		for child != nil {
+			if child.Data == "br" {
+			} else if child.Data == "a" {
+				c := child.FirstChild
+				for c != nil {
+					if c.Data == "br" {
+					} else {
+						buffer.WriteString(c.Data)
+					}
+					c = c.NextSibling
+				}
+			} else {
+				buffer.WriteString(child.Data)
 			}
-		}
-		if child == nil {
-			break
-		}
-		for child.Data == "a" {
-			buffer.WriteString(child.FirstChild.Data)
 			child = child.NextSibling
-			if child == nil {
-				break
-			}
 		}
-		if child == nil {
-			break
-		}
-		if child.Data != "br" && child.Data != "a" {
-			buffer.WriteString(child.Data)
-			buffer.WriteString("\n")
-		}
-		child = child.NextSibling
 	}
 	titleFind := doc.Find("title")
 	if titleFind.Length() < 1 {
 		return Lyrics{}, errors.New("no title")
 	}
-	title := strings.Replace(strings.Replace(titleFind.Get(0).FirstChild.Data, " | LyricsFreak", "", 1), " Lyrics", "", 1)
+	title := strings.Replace(strings.Replace(titleFind.Get(0).FirstChild.Data, " | Genius Lyrics", "", 1), " Lyrics", "", 1)
 	return Lyrics{buffer.String(), title}, nil
 }
 
