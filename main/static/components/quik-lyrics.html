@@ -1,0 +1,178 @@
+<head>
+    <link rel="import" href="/static/components/paper-autocomplete/paper-autocomplete.html">
+    <link rel="import" href="/static/bower_components/paper-card/paper-card.html">
+    <link rel="import" href="/static/bower_components/iron-ajax/iron-ajax.html" />
+    <link rel="import" href="/static/bower_components/iron-list/iron-list.html" />
+    <link rel="import" href="/static/bower_components/paper-collapse-item/paper-collapse-item.html" />
+    <link rel="import" href="/static/bower_components/pushstate-anchor/pushstate-anchor.html">
+    <link rel="import" href="/static/bower_components/app-route/app-route.html">
+    <link rel="import" href="/static/bower_components/app-route/app-location.html">
+    <link rel="import" href="/static/bower_components/paper-item/paper-item.html">    
+    <link rel="import" href="/static/bower_components/app-layout/app-toolbar/app-toolbar.html">
+    <link rel="import" href="/static/bower_components/app-layout/app-header/app-header.html">
+    <link rel="import" href="/static/bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+    <link rel="import" href="/static/bower_components/app-layout/app-header-layout/app-header-layout.html">
+    <link rel="import" href="/static/bower_components/paper-progress/paper-progress.html" />
+    <link rel="import" href="/static/bower_components/paper-radio-group/paper-radio-group.html" />
+    <link rel="import" href="/static/bower_components/paper-styles/color.html" />
+    <link rel="import" href="/static/bower_components/paper-styles/paper-styles-classes.html" />
+    <link rel="import" href="/static/bower_components/paper-styles/typography.html" />
+    <link rel="import" href="/static/bower_components/paper-radio-button/paper-radio-button.html" />
+    <link rel="import" href="/static/bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+    <link rel="import" href="/static/bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="/static/bower_components/paper-styles/default-theme.html" />
+    <link rel="import" href="html-echo.html">
+    <link rel="import" href="/static/css/style.html" />
+</head>
+<dom-module id="quik-lyrics">
+  <template>
+  <app-location route="{{route}}" use-hash-as-path></app-location>
+  <app-route
+      route="{{route}}"
+      active="{{active}}"
+      pattern="/:lyricsOrChords/:lyrics"
+      data="{{routeData}}"
+      tail="{{routeDataTail}}">
+  </app-route>
+    <iron-ajax
+      auto
+      url="/suggest"
+      params="[[_updateParams(suggestQuery)]]"
+      handle-as="json"
+      last-response="{{suggestions}}">
+    ></iron-ajax>
+    <iron-ajax
+      loading="{{loading}}"
+      auto
+      url="/[[routeData.lyricsOrChords]]"
+      params="[[_updateParams(routeData.lyrics)]]"
+      handle-as="json"
+      last-response="{{lyrics}}"></iron-ajax>
+    <iron-ajax
+      id="alternatives-ajax"
+      auto
+      verbose="true"
+      loading="{{urlLoading}}"
+      url="/url"
+      params="[[_alternativeParams(selectedAlternative)]]"
+      last-response="{{lyrics.Lyrics}}"
+      handle-as="json"></iron-ajax>
+      <app-header-layout>
+        <app-header reveals effects="waterfall">
+          <app-toolbar>
+            <a class="nostyle" href="/quik#/lyrics/you stick around and it may show">
+              <div title>QuikLyrics</div>
+            </a>
+            <paper-radio-group selected="{{routeData.lyricsOrChords}}">
+              <paper-radio-button name="lyrics" class="light-indigo">Lyrics</paper-radio-button>
+              <paper-radio-button name="chords" class="light-indigo">Chords</paper-radio-button>
+            </paper-radio-group>
+          </app-toolbar>
+        </app-header>
+    <template is="dom-if" if="[[loading]]">
+    <paper-progress class="pink" indeterminate disabled="[[_progressDisabled(loading, urlLoading)]]"></paper-progress>
+    </template>
+    <div class="quiklyrics content">
+    <paper-autocomplete class="flex" autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
+    <paper-card heading="[[lyrics.Lyrics.Title]]">
+    <div class="card-content">
+    <template is="dom-if" if="[[!loading]]">
+    <paper-collapse-item opened="{{openedCollapse}}" header="Alternatives" icon="icons:list">
+    <iron-list as="item" items="[[lyrics.Alternatives]]" selection-enabled selected-item="{{selectedAlternative}}">
+      <template>
+        <paper-item>
+        <div>[[item.Title]]</div>
+        </paper-item>
+      </template>
+    </iron-list>
+    </paper-collapse-item>
+    </template>
+    <div id="actual-lyrics">
+    <template is="dom-if" if="[[_isLyrics(routeData.lyricsOrChords, loading)]]">
+      [[lyrics.Lyrics.Lyrics]]
+    </template>
+    <template is="dom-if" if="[[_isChords(routeData.lyricsOrChords, loading)]]">
+      <tt>
+        <html-echo html="[[lyrics.Lyrics.Lyrics]]"></html-echo>
+      </tt>
+    </template>
+    </div>
+    </div>
+    </paper-card>
+    </div>
+    </app-header-layout>
+    <style is="custom-style">
+  paper-radio-button.light-indigo {
+    --paper-radio-button-checked-color: var(--paper-indigo-400);
+    --paper-radio-button-checked-ink-color: var(--paper-indigo-400);
+    --paper-radio-button-unchecked-color: var(--paper-indigo-600);
+    --paper-radio-button-unchecked-ink-color: var(--paper-indigo-600);
+    --paper-radio-button-label-color: var(--paper-indigo-100);
+  }
+  paper-progress.pink {
+    --paper-progress-active-color: var(--paper-pink-700);
+    --paper-progress-secondary-color: var(--paper-indigo-300);
+    width:100%;
+    display: block;
+  }
+  app-header {
+        background: var(--paper-indigo-900);
+        color: var(--paper-indigo-100);
+}
+app-header-layout {
+  background: var(--paper-indigo-025);
+}
+.quik-lyrics.content {
+  margin: 2%;
+}
+</style>
+  </template>
+  <script>
+  Polymer({
+    is: 'quik-lyrics',
+    properties: {
+      "lyrics": Object,
+    },
+    attached: function() {
+        if (this.route.path === '') {
+          this.set('route.path', '/lyrics/mattress that you stole');
+        }
+    },
+    _isChords: function(lyricsOrChords, loading) {
+      return 'chords' == lyricsOrChords && !loading;
+    },
+    _isLyrics: function(lyricsOrChords, loading) {
+      return 'lyrics' == lyricsOrChords && !loading;
+    },
+    _updateParams: function(s) {
+      return {lyrics: s, lyricsOrChords: this.routeData.lyricsOrChords};
+    },
+    _processSuggestions: function(s) {
+      return s.suggestions.map(function(ss){
+        return {value: ss , text: ss};
+      });
+    },
+    _updateLyricsQuery: function(event) {
+      var lyricsSearch = event.detail.text;
+      this.set('routeData.lyrics', lyricsSearch);
+    },
+    _alternativeParams: function(item) {
+      this.openedCollapse = false;
+      if (item == null) {
+        var oldParams = this.$['alternatives-ajax'].params;
+        if (oldParams == undefined) {
+          return {};
+        }
+        return oldParams;
+      }
+      return {
+        url: item.Url,
+        lyricsOrChords: this.routeData.lyricsOrChords
+      };
+    },
+    _progressDisabled: function(loading, urlLoading) {
+      return !this.loading && !this.urlLoading;
+    }
+  });
+  </script>
+  </dom-module>
