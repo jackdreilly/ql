@@ -68,12 +68,12 @@
               <paper-radio-button name="chords" class="light-indigo">Chords</paper-radio-button>
             </paper-radio-group>
           </app-toolbar>
+          <paper-autocomplete class="flex" autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
         </app-header>
     <template is="dom-if" if="[[loading]]">
     <paper-progress class="pink" indeterminate disabled="[[_progressDisabled(loading, urlLoading)]]"></paper-progress>
     </template>
     <div class="quiklyrics content">
-    <paper-autocomplete class="flex" autofocus="autofocus" label="Lyrics or song sample" min-length="2" source="[[_processSuggestions(suggestions)]]" text="{{suggestQuery}}" on-autocomplete-selected="_updateLyricsQuery"></paper-autocomplete>
     <paper-card heading="[[lyrics.Lyrics.Title]]">
     <div class="card-content">
     <template is="dom-if" if="[[!loading]]">
@@ -119,11 +119,27 @@
         background: var(--paper-indigo-900);
         color: var(--paper-indigo-100);
 }
+
 app-header-layout {
   background: var(--paper-indigo-025);
 }
+
+paper-autocomplete {
+  margin-left: 3%;
+  margin-right: 3%;  
+}
+
+
+paper-input-container.paper-input-container-0 {
+  padding-top: 0px;
+}
 .quik-lyrics.content {
   margin: 2%;
+}
+</style>
+<style is="custom-style">
+:root {
+        --paper-input-container-input-color: var(--paper-indigo-100);
 }
 </style>
   </template>

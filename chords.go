@@ -2,6 +2,7 @@ package quiklyrics
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 )
@@ -20,15 +21,22 @@ func UltimateGuitar(link string) (Lyrics, error) {
 	titleFind := doc.Find("h1")
 	if titleFind.Length() < 1 {
 		log.Println("Cannot find title.")
-		return Lyrics{}, errors.New("no title")
+		return Lyrics{}, errors.New("no song title")
 	}
-	title := titleFind.Get(0).FirstChild.Data
+	songTitle := titleFind.Get(0).FirstChild.Data
+	titleFind = doc.Find(".t_autor a")
+	if titleFind.Length() < 1 {
+		log.Println("Cannot find title.")
+		return Lyrics{}, errors.New("no author")
+	}
+	songAuthor := titleFind.Get(0).FirstChild.Data
+
 	chords, e := find.Html()
 	if e != nil {
 		log.Println("Failed on html grab.", e.Error())
 		return Lyrics{}, e
 	}
-	return Lyrics{chords, title}, nil
+	return Lyrics{chords, fmt.Sprintf("%v - %v", songAuthor, songTitle)}, nil
 }
 
 type lyricsError struct {
