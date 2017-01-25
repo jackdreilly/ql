@@ -216,6 +216,8 @@ paper-input-container.paper-input-container-0 {
       return 'lyrics' == lyricsOrChords && !loading;
     },
     _updateParams: function(s) {
+    	this.openedCollapse = false;
+    	this.openedCollapseRecent = false;
       return {lyrics: s, lyricsOrChords: this.routeData.lyricsOrChords};
     },
     _processSuggestions: function(s) {
