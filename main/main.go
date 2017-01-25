@@ -40,6 +40,7 @@ func main() {
 	r.HandleFunc("/lyrics", quiklyrics.SearchServer)
 	r.HandleFunc("/chords", quiklyrics.ChordsServer)
 	r.HandleFunc("/url", quiklyrics.UrlServer)
+	r.HandleFunc("/recent", quiklyrics.RecentServer)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/", r)
 	http.ListenAndServe(":"+os.Getenv("PORT"), nil)

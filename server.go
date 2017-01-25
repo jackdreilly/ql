@@ -49,7 +49,8 @@ func SuggestServer(w http.ResponseWriter, r *http.Request) {
 
 func SearchServer(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("lyrics")
-	Client.StoreSearch(query)
+	lOrC := r.URL.Query().Get("lyricsOrChords")
+	Client.StoreSearch(query, lOrC)
 	lyrics, alts, e := GetLyricsForQuery(query)
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusNotFound)
@@ -95,7 +96,8 @@ func UrlServer(w http.ResponseWriter, r *http.Request) {
 
 func ChordsServer(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("lyrics")
-	Client.StoreSearch(query)
+	lOrC := r.URL.Query().Get("lyricsOrChords")
+	Client.StoreSearch(query, lOrC)
 	lyrics, alts, e := GetChordsForQuery(query)
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusNotFound)
@@ -106,6 +108,16 @@ func ChordsServer(w http.ResponseWriter, r *http.Request) {
 		Lyrics:       lyrics,
 		Alternatives: alts,
 	})
+	if e != nil {
+		http.Error(w, e.Error(), http.StatusNotFound)
+		return
+	}
+	w.Write(b)
+}
+
+func RecentServer(w http.ResponseWriter, r *http.Request) {
+	searches := Client.AllSearches(10)
+	b, e := json.Marshal(searches)
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusNotFound)
 		return
