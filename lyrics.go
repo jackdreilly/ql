@@ -15,6 +15,53 @@ type Lyrics struct {
 	Title  string
 }
 
+func Genius(link string) (Lyrics, error) {
+	doc, err := CurrentFetcher.Fetch(link)
+	if err != nil {
+		log.Println("could not fetch failed for " + link)
+		return Lyrics{}, errors.New("no match")
+	}
+	find := doc.Find(".lyrics p")
+	if find.Length() < 1 {
+		log.Println("could not base parse failed for " + link)
+		return Lyrics{}, errors.New("no match")
+	}
+	var buffer bytes.Buffer
+	var child = find.Get(0).FirstChild
+	for child != nil {
+		for child.Data == "br" {
+			child = child.NextSibling
+			if child == nil {
+				break
+			}
+		}
+		if child == nil {
+			break
+		}
+		for child.Data == "a" {
+			buffer.WriteString(child.FirstChild.Data)
+			child = child.NextSibling
+			if child == nil {
+				break
+			}
+		}
+		if child == nil {
+			break
+		}
+		if child.Data != "br" && child.Data != "a" {
+			buffer.WriteString(child.Data)
+			buffer.WriteString("\n")
+		}
+		child = child.NextSibling
+	}
+	titleFind := doc.Find("title")
+	if titleFind.Length() < 1 {
+		return Lyrics{}, errors.New("no title")
+	}
+	title := strings.Replace(strings.Replace(titleFind.Get(0).FirstChild.Data, " | LyricsFreak", "", 1), " Lyrics", "", 1)
+	return Lyrics{buffer.String(), title}, nil
+}
+
 func LyricsFreak(link string) (Lyrics, error) {
 	doc, err := CurrentFetcher.Fetch(link)
 	if err != nil {
@@ -141,6 +188,8 @@ func GetLyricsUrl(url string) (lyrics Lyrics, err error) {
 		lyrics, err = DirectLyrics(url)
 	} else if strings.Contains(url, "azlyrics.com") {
 		lyrics, err = AzLyrics(url)
+	} else if strings.Contains(url, "genius.com") {
+		lyrics, err = Genius(url)
 	} else {
 		err = errors.New("No lyrics site match")
 	}
