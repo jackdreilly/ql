@@ -264,5 +264,9 @@ func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
 }
 
 func GetLyricsForQuery(query string) (Lyrics, []Alternative, error) {
-	return GetLyrics(GoogleSearch(query))
+	l, a, e := GetLyrics(GoogleSearch(query))
+	if e != nil {
+		return GetLyrics(GoogleSearchNoAz(query))
+	}
+	return l, a, e
 }
