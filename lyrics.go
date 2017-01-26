@@ -206,7 +206,7 @@ func helperLyrics(result Result, c chan lyricsError, i int, done chan struct{}) 
 	log.Println("finished lyrics", i)
 }
 
-func pullResultsFromChannel(results chan lyricsError, done chan struct{}, numRequests int) (Lyrics, []Alternative, error) {
+func pullResultsFromChannel(results chan lyricsError, done chan struct{}, numRequests int) (Lyrics, []Alternative, error, int) {
 	resultsSlice := make([]lyricsError, numRequests)
 	for i := 0; i < numRequests; i++ {
 		resultsSlice[i].er = errors.New("Never populated")
@@ -245,15 +245,15 @@ func pullResultsFromChannel(results chan lyricsError, done chan struct{}, numReq
 		}
 	}
 	if sln < 0 {
-		return Lyrics{}, alts, errors.New("No matches")
+		return Lyrics{}, alts, errors.New("No matches"), 0
 	}
 	s := *resultsSlice[sln].lyrics
 
 	s.Lyrics = strings.TrimSpace(s.Lyrics)
-	return s, alts, nil
+	return s, alts, nil, sln
 }
 
-func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
+func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error, int) {
 	results := make(chan lyricsError)
 	done := make(chan struct{})
 	defer close(done)
@@ -264,9 +264,9 @@ func GetLyrics(searchResults []Result) (Lyrics, []Alternative, error) {
 }
 
 func GetLyricsForQuery(query string) (Lyrics, []Alternative, error) {
-	l, a, e := GetLyrics(GoogleSearch(query))
-	if e != nil {
-		return GetLyrics(GoogleSearchNoAz(query))
+	l, a, e, i := GetLyrics(GoogleSearch(query))
+	if e != nil || i > 3 {
+		l, a, e, i = GetLyrics(GoogleSearchNoAz(query))
 	}
 	return l, a, e
 }

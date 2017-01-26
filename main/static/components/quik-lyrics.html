@@ -78,6 +78,7 @@
       url="/[[routeData.lyricsOrChords]]"
       params="[[_updateParams(routeData.lyrics)]]"
       handle-as="json"
+      on-error="_handleErrorResponse"
       last-response="{{lyrics}}"></iron-ajax>
     <iron-ajax
       id="alternatives-ajax"
@@ -87,6 +88,7 @@
       url="/url"
       params="[[_alternativeParams(selectedAlternative)]]"
       last-response="{{lyrics.Lyrics}}"
+      on-error="_handleErrorResponse"
       handle-as="json"></iron-ajax>
     <iron-ajax
       id="recent-ajax"
@@ -95,6 +97,7 @@
       loading="{{loading}}"
       url="/recent"
       last-response="{{recent}}"
+      on-error="_handleErrorResponse"
       handle-as="json"></iron-ajax>
       <app-header-layout>
         <app-header reveals effects="waterfall">
@@ -249,6 +252,12 @@ paper-input-container.paper-input-container-0 {
         url: item.Url,
         lyricsOrChords: this.routeData.lyricsOrChords
       };
+    },
+    _handleErrorResponse: function() {
+    	this.set('lyrics', {Lyrics: {
+    		Lyrics: "No results. Try adding the artist, or something else...",
+    		Title: ""
+    	}, Alternatives: []});
     },
     _selectedRecent: function(item) {
     	this.openedCollapseRecent = false;

@@ -67,7 +67,7 @@ func helper(result Result, c chan lyricsError, i int, done chan struct{}) {
 	log.Println("finished lyrics", i)
 }
 
-func GetChords(searchResults []Result) (Lyrics, []Alternative, error) {
+func GetChords(searchResults []Result) (Lyrics, []Alternative, error, int) {
 	results := make(chan lyricsError, 10)
 	done := make(chan struct{})
 	defer close(done)
@@ -78,5 +78,6 @@ func GetChords(searchResults []Result) (Lyrics, []Alternative, error) {
 }
 
 func GetChordsForQuery(query string) (Lyrics, []Alternative, error) {
-	return GetChords(GoogleSearchChords(query))
+	l, a, e, _ := GetChords(GoogleSearchChords(query))
+	return l, a, e
 }
