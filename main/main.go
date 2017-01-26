@@ -43,5 +43,9 @@ func main() {
 	r.HandleFunc("/recent", quiklyrics.RecentServer)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	http.Handle("/", r)
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "8080"
+	}
+	http.ListenAndServe(":"+port, nil)
 }

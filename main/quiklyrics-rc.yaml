@@ -1,0 +1,22 @@
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: outyet-v3
+spec:
+  replicas: 3
+  selector:
+    name: outyet
+    version: "3"
+  template:
+    metadata:
+      labels:
+        name: outyet
+        version: "3"
+    spec:
+      containers:
+        - image: gcr.io/alpha-connect-four/quiklyrics:v1
+          name: outyet
+          ports:
+            - containerPort: 8080
+              hostPort: 8080
+              protocol: TCP
