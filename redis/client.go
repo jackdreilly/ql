@@ -2,6 +2,7 @@ package redis
 
 import (
 	"encoding/json"
+	"os"
 	"time"
 
 	"log"
@@ -19,9 +20,13 @@ type DbClient struct {
 }
 
 func NewQLClient() *DbClient {
+	host := "redis-master"
+	if os.Getenv("GET_HOSTS_FROM") == "env" {
+		host = os.Getenv("REDIS_MASTER_SERVICE_HOST")
+	}
 	c := &DbClient{
 		client: rds.NewClient(&rds.Options{
-			Addr: "localhost:6379",
+			Addr: host + ":6379",
 		}),
 	}
 	c.initialize()
