@@ -240,9 +240,8 @@ func pullResultsFromChannel(results chan lyricsError, done chan struct{}, numReq
 		}
 		if sln < 0 {
 			sln = i
-		} else {
-			alts = append(alts, Alternative{Title: le.lyrics.Title, Url: le.url})
 		}
+		alts = append(alts, Alternative{Title: le.lyrics.Title, Url: le.url})
 	}
 	if sln < 0 {
 		return Lyrics{}, alts, errors.New("No matches"), 0
