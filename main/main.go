@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/jackdreilly/ql"
+	quiklyrics "github.com/jackdreilly/ql"
 )
 
 const (
