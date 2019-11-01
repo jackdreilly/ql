@@ -24,7 +24,7 @@
     "test": "polymer test"
   },
   "devDependencies": {
-    "eslint": "^3.11.0",
+    "eslint": "^6.6.0",
     "eslint-plugin-html": "^1.7.0",
     "fs-extra": "^0.8.1",
     "gulp": "^3.8.7",
