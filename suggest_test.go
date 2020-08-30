@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import "testing"
 

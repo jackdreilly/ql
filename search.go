@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	key               = "AIzaSyDTtyBAmPzhyB2vuHfUTP7k5Wbvv24PGsg"
+	key               = "AIzaSyCUZul_rbaJocx-923vAmYZcboqDZi5Ycg"
 	lyricsEngine      = "001283733761018543620%3Aujg1bejtz_y"
 	lyricsEngineNoAz  = "001283733761018543620:q_vn9d9funi"
 	chordsEngine      = "001283733761018543620:wwna3zpolnc"

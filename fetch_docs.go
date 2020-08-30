@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import (
 	"net/http"
@@ -21,7 +21,7 @@ func (s standardFetcher) Fetch(urlString string) (*goquery.Document, error) {
 		return nil, err
 	}
 
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0")
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

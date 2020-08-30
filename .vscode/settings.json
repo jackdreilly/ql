@@ -1,0 +1,11 @@
+{
+    "vscsm.debug": false, // Enable debug information in the output panel; default: false
+    "vscsm.showInStatusBar": false, // Disables the status bar item if false; default: true
+
+    // Custom contextual menu items visibility:
+    // (see inline help for details)
+    "vscsm.showMenu.openInSublimeMerge": false,
+    "vscsm.showMenu.fileHistoryInSublimeMerge": "always",
+    "vscsm.showMenu.lineHistoryInSublimeMerge": "withSelection",
+    "vscsm.showMenu.blameInSublimeMerge": "withSelection",
+}

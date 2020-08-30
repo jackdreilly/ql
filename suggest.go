@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import (
 	"fmt"

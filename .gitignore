@@ -28,3 +28,4 @@ _testmain.go
 *~
 main/static/bower_components/
 main/gin*
+server

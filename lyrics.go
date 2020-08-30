@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/html"
 )
 
 type Lyrics struct {
@@ -22,36 +23,53 @@ func Genius(link string) (Lyrics, error) {
 		return Lyrics{}, errors.New("no match")
 	}
 	find := doc.Find(".lyrics p")
+	addSpaces := false
+	if find.Length() < 1 {
+		find = doc.Find("[class^=Lyrics__Container]")
+		log.Println("Genius fallback", find.Length())
+		addSpaces = true
+	}
 	if find.Length() < 1 {
 		log.Println("could not base parse failed for " + link)
 		return Lyrics{}, errors.New("no match")
-	}
-	var buffer bytes.Buffer
-	for _, node := range find.Nodes {
-		child := node.FirstChild
-		for child != nil {
-			if child.Data == "br" {
-			} else if child.Data == "a" {
-				c := child.FirstChild
-				for c != nil {
-					if c.Data == "br" {
-					} else {
-						buffer.WriteString(c.Data)
-					}
-					c = c.NextSibling
-				}
-			} else {
-				buffer.WriteString(child.Data)
-			}
-			child = child.NextSibling
-		}
 	}
 	titleFind := doc.Find("title")
 	if titleFind.Length() < 1 {
 		return Lyrics{}, errors.New("no title")
 	}
 	title := strings.Replace(strings.Replace(titleFind.Get(0).FirstChild.Data, " | Genius Lyrics", "", 1), " Lyrics", "", 1)
-	return Lyrics{buffer.String(), title}, nil
+	return Lyrics{Text(find, addSpaces), title}, nil
+}
+
+// Text gets the combined text contents of each element in the set of matched
+// elements, including their descendants.
+func Text(s *goquery.Selection, addSpaces bool) string {
+	var buf bytes.Buffer
+
+	// Slightly optimized vs calling Each: no single selection object created
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.TextNode {
+			// Keep newlines and spaces, like jQuery
+			buf.WriteString(n.Data)
+			if addSpaces {
+				buf.WriteString("\n")
+			}
+		}
+		if n.FirstChild != nil {
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				f(c)
+			}
+		}
+	}
+	for _, n := range s.Nodes {
+		f(n)
+		if addSpaces {
+			buf.WriteString("\n\n")
+		}
+	}
+
+	return buf.String()
 }
 
 func LyricsFreak(link string) (Lyrics, error) {

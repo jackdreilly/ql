@@ -1,4 +1,4 @@
-package quiklyrics
+package main
 
 import (
 	"encoding/json"
@@ -50,8 +50,14 @@ func SuggestServer(w http.ResponseWriter, r *http.Request) {
 func SearchServer(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("lyrics")
 	lOrC := r.URL.Query().Get("lyricsOrChords")
-	Client.StoreSearch(query, lOrC)
-	lyrics, alts, e := GetLyricsForQuery(query)
+	var lyrics Lyrics
+	var alts []Alternative
+	var e error
+	if lOrC == "lyrics" {
+		lyrics, alts, e = GetLyricsForQuery(query)
+	} else {
+		lyrics, alts, e = GetChordsForQuery(query)
+	}
 	if e != nil {
 		http.Error(w, e.Error(), http.StatusNotFound)
 		return
@@ -69,7 +75,6 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 
 func UrlServer(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query().Get("url")
-	// TODO: Store redis.
 	lyricsOrChords := r.URL.Query().Get("lyricsOrChords")
 	log.Println("url", url, "lyrics or chords", lyricsOrChords)
 	var lyrics Lyrics
@@ -89,37 +94,6 @@ func UrlServer(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(lyrics)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	w.Write(b)
-}
-
-func ChordsServer(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("lyrics")
-	lOrC := r.URL.Query().Get("lyricsOrChords")
-	Client.StoreSearch(query, lOrC)
-	lyrics, alts, e := GetChordsForQuery(query)
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusNotFound)
-		return
-	}
-	// lyrics, alts := searchFake(query)
-	b, e := json.Marshal(SearchResponse{
-		Lyrics:       lyrics,
-		Alternatives: alts,
-	})
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusNotFound)
-		return
-	}
-	w.Write(b)
-}
-
-func RecentServer(w http.ResponseWriter, r *http.Request) {
-	searches := Client.AllSearches(10)
-	b, e := json.Marshal(searches)
-	if e != nil {
-		http.Error(w, e.Error(), http.StatusNotFound)
 		return
 	}
 	w.Write(b)
